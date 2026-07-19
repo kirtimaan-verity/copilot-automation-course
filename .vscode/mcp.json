@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "course-data": {
+      "command": "node",
+      "args": ["${workspaceFolder}/tools/mcp-local/server.js"]
+    }
+  }
+}

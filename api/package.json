@@ -1,0 +1,16 @@
+{
+  "name": "task-manager-api",
+  "version": "1.0.0",
+  "description": "Task Manager API — course starter for GitHub Copilot for Automation Engineers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node ../db/seed.js",
+    "seed:clean": "node ../db/seed.js --clean"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,11 @@
+# Python test dependencies for the Copilot Automation course
+# Requires Python 3.11+
+# Install: python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+pytest==9.1.1
+pytest-html==4.2.0
+pytest-cov==7.1.0
+pytest-playwright==0.8.0
+requests==2.34.2
+SQLAlchemy==2.0.51
+Faker==40.31.0
+PyYAML==6.0.3

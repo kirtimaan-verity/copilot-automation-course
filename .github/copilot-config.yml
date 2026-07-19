@@ -1,0 +1,20 @@
+# Copilot content exclusions (Module 2, Lab 07)
+#
+# IMPORTANT: GitHub Copilot does NOT read this file. Content exclusion is
+# enforced only through the GitHub settings UI:
+#   Repository → Settings → Copilot → Content exclusion  (Copilot Business/Enterprise)
+# This file is the team's source-controlled RECORD of the exclusions that
+# must be configured there — paste the paths below into that settings page.
+# Note: per GitHub docs, exclusions do not apply to Copilot CLI or agent modes.
+version: 1
+content_exclusions:
+  - path: ".env"
+    reason: "Environment credentials"
+  - path: ".env.*"
+    reason: "Environment-specific credentials"
+  - path: "db/seeds/production*.sql"
+    reason: "Production PII data"
+  - path: "tests/fixtures/auth-tokens.json"
+    reason: "Test auth tokens"
+  - path: "**/*secret*"
+    reason: "Files with 'secret' in the name"

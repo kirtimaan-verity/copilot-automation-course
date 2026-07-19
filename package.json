@@ -1,0 +1,25 @@
+{
+  "name": "copilot-automation-course",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Course starter — GitHub Copilot for Automation Engineers (root workspace)",
+  "workspaces": [
+    "api",
+    "web-app",
+    "tools/mcp-local"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace web-app",
+    "start:api": "node api/server.js",
+    "seed": "node db/seed.js",
+    "seed:clean": "node db/seed.js --clean",
+    "test:web": "npm test --workspace web-app"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "c8": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,13 @@
+# yamllint configuration for the course repository.
+# Labs 08, 26, 34 and 39 run `yamllint` against .github/workflows/ and
+# expect a clean pass. GitHub Actions YAML idioms ("on:" keyword, no
+# document-start marker, long expression lines) trip yamllint's strict
+# defaults, so we relax exactly those rules.
+extends: default
+
+rules:
+  line-length:
+    max: 120
+  truthy:
+    check-keys: false
+  document-start: disable

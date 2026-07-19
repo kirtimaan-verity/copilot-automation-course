@@ -1,0 +1,32 @@
+:root {
+  --magenta: #9F2064;
+  --magenta-light: #B35387;
+  --grey-bg: #DFE5E5;
+  --body: #424242;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--body); background: #f7f7f8; }
+.app-header { background: var(--magenta); color: #fff; padding: 1rem 1.5rem; }
+.app-header h1 { margin: 0; font-size: 1.5rem; }
+.app-subtitle { font-size: 0.8rem; opacity: 0.85; }
+.app-main { max-width: 720px; margin: 1.5rem auto; padding: 0 1rem; }
+.task-list-toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.task-list-toolbar button { background: var(--magenta); color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.task-list-toolbar input, .task-list-toolbar select { padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+.task-list { list-style: none; padding: 0; margin: 0; }
+.task-card { background: #fff; border: 1px solid #e2e2e2; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; position: relative; }
+.task-card-main { display: flex; align-items: center; gap: 0.5rem; }
+.task-card-title { font-weight: bold; }
+.task-badge { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; background: var(--grey-bg); }
+.task-badge.priority-high { background: #f5d0e0; color: var(--magenta); }
+.task-card-due { font-size: 0.8rem; color: #888; margin-top: 0.25rem; }
+.task-delete-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #999; }
+.task-form { background: #fff; border: 1px solid #e2e2e2; border-radius: 6px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.task-form label { font-size: 0.85rem; font-weight: bold; margin-top: 0.5rem; }
+.task-form input, .task-form textarea, .task-form select { padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+.task-form-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.task-form-actions button { padding: 0.5rem 1rem; border-radius: 4px; border: none; cursor: pointer; }
+.task-form-actions button[data-testid="submit-btn"] { background: var(--magenta); color: #fff; }
+.task-form-actions button[data-testid="cancel-btn"] { background: var(--grey-bg); }
+.error-message { background: #fdecea; color: #c0392b; padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.85rem; }
+.app-loading, .task-empty { color: #999; padding: 1rem; text-align: center; }

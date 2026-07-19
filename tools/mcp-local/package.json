@@ -1,0 +1,10 @@
+{
+  "name": "course-data-mcp",
+  "version": "1.1.0",
+  "description": "Local MCP server exposing course project context to Copilot agent mode",
+  "type": "commonjs",
+  "main": "server.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  }
+}

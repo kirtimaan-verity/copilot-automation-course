@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.local
+
+# Database
+db/*.db
+db/*.db-*
+
+# Test artefacts (generated HTML/XML/coverage output stays out of git,
+# but hand-written markdown reports — e.g. Lab 31 release reports — are kept)
+reports/*
+!reports/*.md
+playwright-report/
+test-results/
+blob-report/
+tests/web/__snapshots__/*-actual.png
+tests/web/__snapshots__/*-diff.png
+
+# OS / editor
+.DS_Store
+*.log
