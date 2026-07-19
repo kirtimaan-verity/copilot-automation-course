@@ -39,12 +39,20 @@ jobs:
       - name: Wait for API
         run: sleep 3 && curl -s http://localhost:3001/health
       - name: Run API + DB tests
+        # Exit code 5 = "no tests collected" — expected in the starter repo
+        # until participants generate their tests; treat it as success.
         run: |
+          rc=0
           API_BASE_URL=http://localhost:3001 \
           TEST_DB_URL=sqlite:///./db/app.db \
           pytest tests/api tests/db -v \
             --html=reports/api-report.html --self-contained-html \
-            --junitxml=reports/api-results.xml
+            --junitxml=reports/api-results.xml || rc=$?
+          if [ "$rc" -eq 5 ]; then
+            echo "No tests collected yet (starter repo) — treating as pass."
+            exit 0
+          fi
+          exit "$rc"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -75,7 +83,9 @@ jobs:
           (cd web-app && npm run dev &)
           sleep 5
       - name: Run Playwright tests
-        run: npx playwright test --project=chromium --reporter=html
+        # --pass-with-no-tests keeps the starter repo green until
+        # participants generate their specs during the labs.
+        run: npx playwright test --project=chromium --reporter=html --pass-with-no-tests
         working-directory: web-app
         env:
           BASE_URL: http://localhost:3000
