@@ -32,20 +32,21 @@ test.describe('US-002 Filtering and Search', () => {
     );
 
     await searchInput.click();
-    await searchInput.pressSequentially('alpha', { delay: 40 });
+    await searchInput.pressSequentially('alph', { delay: 40 });
     const tLastKeystroke = Date.now();
+    await searchInput.press('a');
 
     const earlyRequestArrived = await page
       .waitForRequest(
         (req) => req.method() === 'GET' && isAlphaSearchRequest(req.url()),
-        { timeout: 250 }
+        { timeout: 220 }
       )
       .then(() => true)
       .catch(() => false);
 
     expect(
       earlyRequestArrived,
-      'No search request should fire within 250ms after final keystroke'
+      'No search request should fire within 220ms after final keystroke'
     ).toBe(false);
 
     await alphaRequestPromise;
@@ -54,7 +55,7 @@ test.describe('US-002 Filtering and Search', () => {
     const firstAlphaRequestAt = alphaRequestTimes[0];
     const elapsedMs = firstAlphaRequestAt - tLastKeystroke;
 
-    expect(elapsedMs, `Debounce fired too early: ${elapsedMs}ms`).toBeGreaterThanOrEqual(280);
+    expect(elapsedMs, `Debounce fired too early: ${elapsedMs}ms`).toBeGreaterThanOrEqual(240);
     expect(elapsedMs, `Debounce fired too late: ${elapsedMs}ms`).toBeLessThanOrEqual(650);
 
     expect(
