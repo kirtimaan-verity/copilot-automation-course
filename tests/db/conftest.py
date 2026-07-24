@@ -1,53 +1,83 @@
-"""
-Shared pytest fixtures for database tests.
+"""Shared pytest fixtures for database tests."""
 
-Referenced in Module 4 Lab 17. Demonstrates the two critical patterns
-the slides describe:
-  1. The rollback fixture (test isolation at the DB level)
-  2. PRAGMA foreign_keys = ON (SQLite does NOT enforce FKs by default)
+from __future__ import annotations
 
-Run: source ../../.venv/bin/activate
-     TEST_DB_URL=sqlite:///./db/app.db pytest tests/db/ -v
-"""
 import os
+from typing import Any, Dict, Iterator, Mapping
+
 import pytest
-from sqlalchemy import create_engine, text
+from faker import Faker
+from sqlalchemy import MetaData, create_engine, delete, event, select, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.schema import Table
 
 
 @pytest.fixture(scope="session")
-def db_engine():
-    """One SQLAlchemy engine for the whole test session."""
-    url = os.environ.get("TEST_DB_URL", "sqlite:///./db/app.db")
-    engine = create_engine(url)
+def db_engine() -> Iterator[Engine]:
+    """Create one SQLAlchemy engine for the whole test session."""
+    db_url = os.environ.get("TEST_DB_URL", "sqlite:///./db/app.db")
+    engine = create_engine(db_url)
     yield engine
     engine.dispose()
 
 
-@pytest.fixture
-def db_session(db_engine):
-    """
-    Each test gets a fresh transaction that is rolled back afterwards.
+@pytest.fixture(scope="session")
+def db_tables(db_engine: Engine) -> Mapping[str, Table]:
+    """Reflect existing tables from the configured database."""
+    metadata = MetaData()
+    metadata.reflect(bind=db_engine)
+    return metadata.tables
 
-    Critical details:
-      - PRAGMA foreign_keys = ON enables FK enforcement (off by default
-        in SQLite). Without it, FK constraint tests pass incorrectly.
-      - The transaction.rollback() at the end undoes everything the test
-        did, keeping tests isolated. Runs even on exception.
-    """
+
+@pytest.fixture(scope="function")
+def db_session(db_engine: Engine) -> Iterator[Session]:
+    """Provide an isolated session using an outer transaction + nested savepoint."""
     connection = db_engine.connect()
-    # Enable FK enforcement for THIS connection.
-    # In SQLAlchemy 2.0, execute() autobegins a transaction; PRAGMA itself
-    # is NOT transactional, so we end the autobegun transaction with
-    # rollback() (the pragma stays in effect on the connection) and then
-    # start our explicit test transaction.
     connection.execute(text("PRAGMA foreign_keys = ON"))
-    connection.rollback()
-    transaction = connection.begin()
+    if connection.in_transaction():
+        connection.rollback()
+
+    outer_transaction = connection.begin()
     session = Session(bind=connection)
+    session.begin_nested()
 
-    yield session  # ---- test runs here ----
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session_obj: Session, transaction: Any) -> None:
+        parent = transaction.parent
+        if transaction.nested and (parent is None or not parent.nested):
+            session_obj.begin_nested()
 
-    session.close()
-    transaction.rollback()
-    connection.close()
+    try:
+        yield session
+    finally:
+        event.remove(session, "after_transaction_end", restart_savepoint)
+        session.close()
+        outer_transaction.rollback()
+        connection.close()
+
+
+@pytest.fixture(scope="function")
+def test_user(db_session: Session, db_tables: Mapping[str, Table]) -> Iterator[Dict[str, Any]]:
+    """Insert a test user and remove it during teardown."""
+    faker = Faker()
+    users_table = db_tables["users"]
+    password_hash = faker.sha256()
+
+    insert_result = db_session.execute(
+        users_table.insert().values(
+            email=faker.unique.email(),
+            password_hash=password_hash,
+            display_name=faker.name(),
+        )
+    )
+    user_id = insert_result.inserted_primary_key[0]
+
+    user_row = db_session.execute(select(users_table).where(users_table.c.id == user_id)).mappings().one()
+    user_data = dict(user_row)
+
+    try:
+        yield user_data
+    finally:
+        db_session.execute(delete(users_table).where(users_table.c.id == user_id))
+        db_session.flush()
