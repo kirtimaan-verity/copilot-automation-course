@@ -63,6 +63,11 @@ jobs:
   web-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -73,7 +78,7 @@ jobs:
       - name: Install Node deps (workspaces)
         run: npm ci
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps ${{ matrix.browser }}
         working-directory: web-app
       - name: Seed database
         run: node db/seed.js --clean
@@ -85,14 +90,49 @@ jobs:
       - name: Run Playwright tests
         # --pass-with-no-tests keeps the starter repo green until
         # participants generate their specs during the labs.
-        run: npx playwright test --project=chromium --reporter=html --pass-with-no-tests
+        run: |
+          npx playwright test \
+            --project=${{ matrix.browser }} \
+            --shard=${{ matrix.shard }}/2 \
+            --reporter=blob \
+            --pass-with-no-tests
         working-directory: web-app
         env:
           BASE_URL: http://localhost:3000
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-blob-${{ matrix.browser }}-shard-${{ matrix.shard }}
+          path: web-app/blob-report/
+          retention-days: 7
+
+  merge-web-report:
+    needs: [web-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+      - name: Install Node deps (workspaces)
+        run: npm ci
+      - name: Download Playwright blob artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-blob-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Merge Playwright blob reports into HTML
+        run: npx playwright merge-reports --reporter html ../all-blob-reports
+        working-directory: web-app
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-merged
           path: web-app/playwright-report/
           retention-days: 7
 
@@ -110,7 +150,7 @@ jobs:
           yamllint .github/workflows/ || true
 
   summary:
-    needs: [api-tests, web-tests, lint]
+    needs: [api-tests, web-tests, merge-web-report, lint]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -120,5 +160,6 @@ jobs:
             echo "## CI Summary"
             echo "- API tests: ${{ needs.api-tests.result }}"
             echo "- Web tests: ${{ needs.web-tests.result }}"
+            echo "- Merged web report: ${{ needs.merge-web-report.result }}"
             echo "- Lint: ${{ needs.lint.result }}"
           } >> "$GITHUB_STEP_SUMMARY"
