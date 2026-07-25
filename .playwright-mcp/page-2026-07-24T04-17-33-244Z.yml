@@ -1,0 +1,17 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Task Manager" [level=1] [ref=e5]
+    - text: Copilot Automation Course — Demo App
+  - main [ref=e6]:
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - button "+ New Task" [ref=e85] [cursor=pointer]
+        - textbox "Search tasks…" [ref=e86]: Playwright exploration task
+        - combobox [ref=e87]:
+          - option "All statuses" [selected]
+          - option "Active"
+          - option "Completed"
+          - option "Overdue"
+          - option "Archived"
+      - list [ref=e88]:
+        - listitem [ref=e264]: No tasks yet.

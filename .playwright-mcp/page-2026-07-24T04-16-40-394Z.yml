@@ -1,0 +1,25 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Task Manager" [level=1] [ref=e5]
+    - text: Copilot Automation Course — Demo App
+  - main [ref=e6]:
+    - generic [ref=e70]:
+      - heading "New Task" [level=2] [ref=e71]
+      - generic [ref=e72]: Title
+      - textbox "Title" [ref=e73]:
+        - /placeholder: What needs doing?
+        - text: Playwright exploration task
+      - generic [ref=e74]: Description
+      - textbox "Description" [ref=e75]:
+        - /placeholder: Optional details
+        - text: Created during automated exploration
+      - generic [ref=e76]: Due date
+      - textbox "Due date" [active] [ref=e77]: 2026-08-15
+      - generic [ref=e78]: Priority
+      - combobox "Priority" [ref=e79]:
+        - option "Low"
+        - option "Medium"
+        - option "High" [selected]
+      - generic [ref=e80]:
+        - button "Create Task" [ref=e81] [cursor=pointer]
+        - button "Cancel" [ref=e82] [cursor=pointer]

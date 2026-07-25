@@ -1,0 +1,79 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Task Manager" [level=1] [ref=e5]
+    - text: Copilot Automation Course — Demo App
+  - main [ref=e6]:
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - button "+ New Task" [ref=e85] [cursor=pointer]
+        - textbox "Search tasks…" [active] [ref=e86]
+        - combobox [ref=e87]:
+          - option "All statuses"
+          - option "Active"
+          - option "Completed" [selected]
+          - option "Overdue"
+          - option "Archived"
+      - list [ref=e88]:
+        - listitem [ref=e152]:
+          - generic [ref=e153]:
+            - generic [ref=e154]: Playwright exploration task
+            - generic [ref=e155]: high
+            - generic [ref=e156]: active
+          - generic [ref=e157]: "Due: 2026-08-15"
+          - button "Delete Playwright exploration task" [ref=e158] [cursor=pointer]: ×
+        - listitem [ref=e159]:
+          - generic [ref=e160]:
+            - generic [ref=e161]: Prepare Q3 test plan
+            - generic [ref=e162]: high
+            - generic [ref=e163]: active
+          - generic [ref=e164]: "Due: 2026-07-31"
+          - button "Delete Prepare Q3 test plan" [ref=e165] [cursor=pointer]: ×
+        - listitem [ref=e166]:
+          - generic [ref=e167]:
+            - generic [ref=e168]: "Review pull request #142"
+            - generic [ref=e169]: high
+            - generic [ref=e170]: active
+          - generic [ref=e171]: "Due: 2026-07-26"
+          - 'button "Delete Review pull request #142" [ref=e172] [cursor=pointer]': ×
+        - listitem [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]: Update onboarding docs
+            - generic [ref=e113]: medium
+            - generic [ref=e114]: active
+          - generic [ref=e115]: "Due: 2026-08-07"
+          - button "Delete Update onboarding docs" [ref=e116] [cursor=pointer]: ×
+        - listitem [ref=e173]:
+          - generic [ref=e174]:
+            - generic [ref=e175]: Fix flaky login test
+            - generic [ref=e176]: high
+            - generic [ref=e177]: overdue
+          - generic [ref=e178]: "Due: 2026-07-23"
+          - button "Delete Fix flaky login test" [ref=e179] [cursor=pointer]: ×
+        - listitem [ref=e180]:
+          - generic [ref=e181]:
+            - generic [ref=e182]: Archive old test reports
+            - generic [ref=e183]: low
+            - generic [ref=e184]: active
+          - generic [ref=e185]: "Due: 2026-08-23"
+          - button "Delete Archive old test reports" [ref=e186] [cursor=pointer]: ×
+        - listitem [ref=e187]:
+          - generic [ref=e188]:
+            - generic [ref=e189]: Set up nightly CI report
+            - generic [ref=e190]: medium
+            - generic [ref=e191]: active
+          - generic [ref=e192]: "Due: 2026-07-29"
+          - button "Delete Set up nightly CI report" [ref=e193] [cursor=pointer]: ×
+        - listitem [ref=e194]:
+          - generic [ref=e195]:
+            - generic [ref=e196]: Write DB constraint tests
+            - generic [ref=e197]: high
+            - generic [ref=e198]: active
+          - generic [ref=e199]: "Due: 2026-07-27"
+          - button "Delete Write DB constraint tests" [ref=e200] [cursor=pointer]: ×
+        - listitem [ref=e201]:
+          - generic [ref=e202]:
+            - generic [ref=e203]: Retire Selenium suite
+            - generic [ref=e204]: low
+            - generic [ref=e205]: completed
+          - generic [ref=e206]: "Due: 2026-07-19"
+          - button "Delete Retire Selenium suite" [ref=e207] [cursor=pointer]: ×

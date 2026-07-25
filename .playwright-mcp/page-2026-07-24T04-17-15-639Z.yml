@@ -1,0 +1,23 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Task Manager" [level=1] [ref=e5]
+    - text: Copilot Automation Course — Demo App
+  - main [ref=e6]:
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - button "+ New Task" [ref=e85] [cursor=pointer]
+        - textbox "Search tasks…" [active] [ref=e86]
+        - combobox [ref=e87]:
+          - option "All statuses" [selected]
+          - option "Active"
+          - option "Completed"
+          - option "Overdue"
+          - option "Archived"
+      - list [ref=e88]:
+        - listitem [ref=e201]:
+          - generic [ref=e202]:
+            - generic [ref=e203]: Retire Selenium suite
+            - generic [ref=e204]: low
+            - generic [ref=e205]: completed
+          - generic [ref=e206]: "Due: 2026-07-19"
+          - button "Delete Retire Selenium suite" [ref=e207] [cursor=pointer]: ×
