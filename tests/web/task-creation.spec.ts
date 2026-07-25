@@ -12,6 +12,14 @@ test.describe('Task creation user journey', () => {
   let taskFormPage: TaskFormPage;
   let taskListPage: TaskListPage;
 
+  const waitForNextSecondBoundary = async (): Promise<void> => {
+    const currentSecond = new Date().getSeconds();
+    await taskListPage.page.waitForFunction(
+      (second) => new Date().getSeconds() !== second,
+      currentSecond
+    );
+  };
+
   const createTaskViaForm = async (title: string, options?: { description?: string; dueDate?: string; priority?: 'Low' | 'Medium' | 'High' }): Promise<void> => {
     await taskListPage.clickNewTaskButton();
     await expect(taskFormPage.form, 'Task form should open after clicking the new task button').toBeVisible();
@@ -99,17 +107,21 @@ test.describe('Task creation user journey', () => {
   test('shows the newly created task at the top of the task list', async () => {
     test.setTimeout(30_000);
 
-    const title = `E2E top-of-list task ${Date.now()}`;
-    const currentSecond = new Date().getSeconds();
-    await taskListPage.page.waitForFunction(
-      (second) => new Date().getSeconds() !== second,
-      currentSecond
-    );
+    const runId = Date.now();
+    const titlePrefix = `E2E top-of-list ${runId}`;
+    const olderTitle = `${titlePrefix} older task`;
+    const newerTitle = `${titlePrefix} newer task`;
 
-    await createTaskViaForm(title);
+    await createTaskViaForm(olderTitle);
+    await waitForNextSecondBoundary();
+    await createTaskViaForm(newerTitle);
+
+    await taskListPage.searchFor(titlePrefix);
+    await expect(taskListPage.getTaskByTitle(olderTitle), 'Filtered list should include the older task used for ordering validation').toHaveCount(1);
+    await expect(taskListPage.getTaskByTitle(newerTitle), 'Filtered list should include the newer task used for ordering validation').toHaveCount(1);
 
     const firstTaskTitle = (await taskListPage.taskTitleItems.first().textContent())?.trim() ?? '';
-    expect(firstTaskTitle, 'Most recently created task should appear as the first item in the task list').toBe(title);
+    expect(firstTaskTitle, 'Most recently created task should appear as the first item in the task list').toBe(newerTitle);
   });
 
   test('closes the form without creating a task when cancel is clicked', async () => {
