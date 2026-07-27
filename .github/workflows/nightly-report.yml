@@ -1,0 +1,101 @@
+name: Nightly Report
+
+on:
+  schedule:
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  nightly-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install -r requirements.txt
+          npx playwright install --with-deps chromium firefox
+
+      - name: Seed database
+        run: node db/seed.js --clean
+
+      - name: Start API and web app
+        run: |
+          node api/server.js &
+          (cd web-app && npm run dev &)
+
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:3001/health >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:3001/health
+
+      - name: Run API and DB tests
+        run: |
+          rc=0
+          API_BASE_URL=http://localhost:3001 \
+          TEST_DB_URL=sqlite:///./db/app.db \
+          pytest tests/api tests/db -v \
+            --html=reports/api-report.html --self-contained-html \
+            --junitxml=reports/api-results.xml \
+            --cov=tests --cov-report=json:reports/coverage.json || rc=$?
+          if [ "$rc" -eq 5 ]; then
+            echo "No API/DB tests collected. Writing fallback coverage for metrics generation."
+            printf '%s\n' '{"totals":{"percent_covered":0}}' > reports/coverage.json
+            exit 0
+          fi
+          exit "$rc"
+
+      - name: Run web tests and generate Playwright JSON report
+        run: |
+          mkdir -p web-app/playwright-report
+          BASE_URL=http://localhost:3000 \
+          npx playwright test --reporter=json --pass-with-no-tests > web-app/playwright-report/results.json
+
+      - name: Generate metrics report
+        id: metrics
+        run: |
+          metrics_line="$(python tools/generate-metrics.py)"
+          echo "metrics_line=${metrics_line}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push metrics report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/metrics-*.md
+          if git diff --cached --quiet; then
+            echo "No metrics changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: update nightly metrics report"
+          git push
+
+      - name: Add workflow summary
+        run: |
+          echo "## Nightly Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.metrics.outputs.metrics_line }}" >> "$GITHUB_STEP_SUMMARY"
