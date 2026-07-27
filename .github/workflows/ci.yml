@@ -154,6 +154,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Report status
         run: |
           {
@@ -163,3 +164,7 @@ jobs:
             echo "- Merged web report: ${{ needs.merge-web-report.result }}"
             echo "- Lint: ${{ needs.lint.result }}"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Generate metrics summary line
+        run: |
+          metrics_line="$(python3 tools/generate-metrics.py)"
+          echo "- Metrics: ${metrics_line}" >> "$GITHUB_STEP_SUMMARY"
