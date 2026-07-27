@@ -47,9 +47,11 @@ jobs:
           TEST_DB_URL=sqlite:///./db/app.db \
           pytest tests/api tests/db -v \
             --html=reports/api-report.html --self-contained-html \
-            --junitxml=reports/api-results.xml || rc=$?
+            --junitxml=reports/api-results.xml \
+            --cov=tests --cov-report=json:reports/coverage.json || rc=$?
           if [ "$rc" -eq 5 ]; then
             echo "No tests collected yet (starter repo) — treating as pass."
+            printf '%s\n' '{"totals":{"percent_covered":0}}' > reports/coverage.json
             exit 0
           fi
           exit "$rc"
@@ -164,6 +166,11 @@ jobs:
             echo "- Merged web report: ${{ needs.merge-web-report.result }}"
             echo "- Lint: ${{ needs.lint.result }}"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Download API reports
+        uses: actions/download-artifact@v4
+        with:
+          name: api-report
+          path: reports
       - name: Generate metrics summary line
         run: |
           metrics_line="$(python3 tools/generate-metrics.py)"
