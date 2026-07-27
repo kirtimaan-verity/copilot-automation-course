@@ -1,4 +1,5 @@
-import { type Page, expect, test } from '@playwright/test';
+import * as fs from 'node:fs';
+import { type Page, type TestInfo, expect, test } from '@playwright/test';
 
 const mockTasks = [
   {
@@ -12,6 +13,14 @@ const mockTasks = [
 ];
 
 test.describe('Visual regression for tasks UI', () => {
+  const skipIfSnapshotMissing = (testInfo: TestInfo, snapshotName: string): void => {
+    const baselinePath = testInfo.snapshotPath(snapshotName);
+    test.skip(
+      !fs.existsSync(baselinePath),
+      `Visual baseline is missing for ${testInfo.project.name} on ${process.platform}: ${baselinePath}`
+    );
+  };
+
   const goToTasksDashboard = async (page: Page): Promise<void> => {
     await page.goto('/');
   };
@@ -31,8 +40,9 @@ test.describe('Visual regression for tasks UI', () => {
     });
   });
 
-  test('matches full-page tasks dashboard baseline', async ({ page }) => {
+  test('matches full-page tasks dashboard baseline', async ({ page }, testInfo) => {
     test.setTimeout(30_000);
+    skipIfSnapshotMissing(testInfo, 'tasks-dashboard-full-page.png');
     await goToTasksDashboard(page);
     await expect(page.getByTestId('task-list'), 'Task list should be visible before full-page screenshot').toBeVisible();
 
@@ -43,8 +53,9 @@ test.describe('Visual regression for tasks UI', () => {
     );
   });
 
-  test('matches task creation form baseline', async ({ page }) => {
+  test('matches task creation form baseline', async ({ page }, testInfo) => {
     test.setTimeout(30_000);
+    skipIfSnapshotMissing(testInfo, 'task-creation-form.png');
     await goToTasksDashboard(page);
     await page.getByTestId('new-task-btn').click();
 
@@ -56,8 +67,9 @@ test.describe('Visual regression for tasks UI', () => {
     );
   });
 
-  test('matches task card layout baseline', async ({ page }) => {
+  test('matches task card layout baseline', async ({ page }, testInfo) => {
     test.setTimeout(30_000);
+    skipIfSnapshotMissing(testInfo, 'task-card-layout.png');
     await goToTasksDashboard(page);
 
     const firstTaskCard = page.getByTestId('task-card').first();

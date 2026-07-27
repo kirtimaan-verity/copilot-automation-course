@@ -131,6 +131,9 @@ jobs:
       - name: Merge Playwright blob reports into HTML
         run: npx playwright merge-reports --reporter html ../all-blob-reports
         working-directory: web-app
+      - name: Merge Playwright blob reports into JSON
+        run: npx playwright merge-reports --reporter json ../all-blob-reports > playwright-report/results.json
+        working-directory: web-app
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -171,6 +174,11 @@ jobs:
         with:
           name: api-report
           path: reports
+      - name: Download merged Playwright report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report-merged
+          path: web-app/playwright-report
       - name: Generate metrics summary line
         run: |
           metrics_line="$(python3 tools/generate-metrics.py)"
