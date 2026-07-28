@@ -19,12 +19,12 @@ EXPIRED_JWT = (
 
 """
 def _post_task(api_base_url: str, payload: Dict[str, Any], headers: Optional[Dict[str, str]]) -> requests.Response:
-    """Send a POST /tasks request with a small timeout for reliability in CI."""
+    # """Send a POST /tasks request with a small timeout for reliability in CI."""
     return requests.post(f"{api_base_url}/tasks", json=payload, headers=headers, timeout=10)
 
 
 def _delete_task_if_created(api_base_url: str, auth_headers: Dict[str, str], task_id: Optional[int]) -> None:
-    """Delete created tasks so tests remain independent and idempotent."""
+    # """Delete created tasks so tests remain independent and idempotent."""
     if task_id is None:
         return
 
@@ -35,7 +35,7 @@ def _delete_task_if_created(api_base_url: str, auth_headers: Dict[str, str], tas
 
 
 def test_unauthenticated_request_returns_401(api_base_url: str, auth_headers: Dict[str, str]) -> None:
-    """POST /tasks without auth must be rejected with 401."""
+    # """POST /tasks without auth must be rejected with 401."""
     # OWASP API2: Broken Authentication - endpoints must reject requests with no authentication.
     payload = {"title": "Unauthenticated task should be rejected"}
     headers_without_auth = {key: value for key, value in auth_headers.items() if key.lower() != "authorization"}
@@ -46,7 +46,7 @@ def test_unauthenticated_request_returns_401(api_base_url: str, auth_headers: Di
 
 
 def test_invalid_token_returns_401(api_base_url: str, auth_headers: Dict[str, str]) -> None:
-    """POST /tasks with malformed bearer token must be rejected with 401."""
+    # """POST /tasks with malformed bearer token must be rejected with 401."""
     # OWASP API2: Broken Authentication - malformed credentials must not be accepted.
     payload = {"title": "Malformed token should be rejected"}
     headers_with_invalid_token = dict(auth_headers)
@@ -58,7 +58,7 @@ def test_invalid_token_returns_401(api_base_url: str, auth_headers: Dict[str, st
 
 
 def test_expired_token_returns_401(api_base_url: str, auth_headers: Dict[str, str]) -> None:
-    """POST /tasks with expired JWT must be rejected with 401."""
+    # """POST /tasks with expired JWT must be rejected with 401."""
     # OWASP API2: Broken Authentication - expired tokens must not authorize API access.
     payload = {"title": "Expired token should be rejected"}
     headers_with_expired_token = dict(auth_headers)
@@ -70,7 +70,7 @@ def test_expired_token_returns_401(api_base_url: str, auth_headers: Dict[str, st
 
 
 def test_sql_injection_in_title_returns_safe_response(api_base_url: str, auth_headers: Dict[str, str]) -> None:
-    """POST /tasks with SQL injection-like input must not crash the API."""
+    # """POST /tasks with SQL injection-like input must not crash the API."""
     # OWASP API8: Security Misconfiguration - malformed/malicious input must not cause 500 errors.
     created_task_id: Optional[int] = None
     payload = {
@@ -96,7 +96,7 @@ def test_sql_injection_in_title_returns_safe_response(api_base_url: str, auth_he
 
 
 def test_xss_payload_in_title_stored_safely(api_base_url: str, auth_headers: Dict[str, str]) -> None:
-    """POST /tasks with XSS-like title should store a sanitized/encoded value or reject safely."""
+    # """POST /tasks with XSS-like title should store a sanitized/encoded value or reject safely."""
     # OWASP API3: Broken Object Property Level Exposure - responses should not reflect unsafe script payloads raw.
     created_task_id: Optional[int] = None
     payload = {
