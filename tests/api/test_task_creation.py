@@ -8,6 +8,8 @@ from typing import Any, Dict, Optional
 import pytest
 import requests
 
+from tests.fixtures.data_factory import TaskFactory
+
 
 def _delete_task_if_created(api_base_url: str, auth_headers: Dict[str, str], task_id: Optional[int]) -> None:
     """Delete a created task to keep tests independent."""
@@ -22,17 +24,17 @@ def _delete_task_if_created(api_base_url: str, auth_headers: Dict[str, str], tas
 def test_create_task_returns_201(
     api_base_url: str,
     auth_headers: Dict[str, str],
-    test_task_data: Dict[str, Any],
 ) -> None:
     """POST /tasks should create a valid task and return HTTP 201."""
     created_task_id: Optional[int] = None
-    response = requests.post(f"{api_base_url}/tasks", json=test_task_data, headers=auth_headers, timeout=10)
+    payload = TaskFactory.valid_task()
+    response = requests.post(f"{api_base_url}/tasks", json=payload, headers=auth_headers, timeout=10)
 
     try:
         assert response.status_code == 201, f"Expected 201 for valid task creation, got {response.status_code}"
         body = response.json()
         created_task_id = body.get("id")
-        assert body["title"] == test_task_data["title"], f"Expected title '{test_task_data['title']}', got {body['title']}"
+        assert body["title"] == payload["title"], f"Expected title '{payload['title']}', got {body['title']}"
     finally:
         _delete_task_if_created(api_base_url, auth_headers, created_task_id)
 
@@ -40,11 +42,11 @@ def test_create_task_returns_201(
 def test_create_task_response_contains_id(
     api_base_url: str,
     auth_headers: Dict[str, str],
-    test_task_data: Dict[str, Any],
 ) -> None:
     """POST /tasks response should include a positive integer id for the new task."""
     created_task_id: Optional[int] = None
-    response = requests.post(f"{api_base_url}/tasks", json=test_task_data, headers=auth_headers, timeout=10)
+    payload = TaskFactory.valid_task()
+    response = requests.post(f"{api_base_url}/tasks", json=payload, headers=auth_headers, timeout=10)
 
     try:
         assert response.status_code == 201, f"Expected 201 for valid task creation, got {response.status_code}"
@@ -59,11 +61,11 @@ def test_create_task_response_contains_id(
 def test_create_task_default_priority_is_medium(
     api_base_url: str,
     auth_headers: Dict[str, str],
-    test_task_data: Dict[str, Any],
 ) -> None:
     """POST /tasks should default priority to medium when priority is not provided."""
     created_task_id: Optional[int] = None
-    payload = {key: value for key, value in test_task_data.items() if key != "priority"}
+    payload = TaskFactory.valid_task()
+    payload.pop("priority", None)
     response = requests.post(f"{api_base_url}/tasks", json=payload, headers=auth_headers, timeout=10)
 
     try:
@@ -78,17 +80,14 @@ def test_create_task_default_priority_is_medium(
 def test_create_task_with_all_fields(
     api_base_url: str,
     auth_headers: Dict[str, str],
-    test_task_data: Dict[str, Any],
 ) -> None:
     """POST /tasks should persist and return all provided task fields."""
     created_task_id: Optional[int] = None
-    payload = {
-        **test_task_data,
-        "status": "active",
-        # user_id is nullable but must reference an existing users.id when non-null.
-        # Use explicit null to keep "all fields" coverage without FK dependency on seed data.
-        "user_id": None,
-    }
+    payload = TaskFactory.valid_task()
+    payload["status"] = "active"
+    # user_id is nullable but must reference an existing users.id when non-null.
+    # Use explicit null to keep "all fields" coverage without FK dependency on seed data.
+    payload["user_id"] = None
     response = requests.post(f"{api_base_url}/tasks", json=payload, headers=auth_headers, timeout=10)
 
     try:
@@ -117,12 +116,11 @@ def test_create_task_with_all_fields(
 def test_create_task_validation_errors_return_400(
     api_base_url: str,
     auth_headers: Dict[str, str],
-    test_task_data: Dict[str, Any],
     payload_override: Dict[str, Any],
     expected_error_substring: str,
 ) -> None:
     """POST /tasks should return 400 with validation details for invalid payload variants."""
-    payload = dict(test_task_data)
+    payload = TaskFactory.valid_task()
     payload.update(payload_override)
     if payload_override.get("title", "__unchanged__") is None:
         payload.pop("title", None)
